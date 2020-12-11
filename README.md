@@ -3,7 +3,7 @@
 
 <h4>Shallow Water Model Fun (SWFUN)</h4>
 
-code by Sulian Thual 
+code by Sulian Thual (2019)
 
 Matlab code to integrate a very Simple Shallow-Water Model (with rotation). 
 
