@@ -1,0 +1,538 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+% Added by lyx2lyx
+\renewcommand{\textendash}{--}
+\renewcommand{\textemdash}{---}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement H
+\paperfontsize 12
+\spacing double
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine natbib
+\cite_engine_type authoryear
+\biblio_style plainnat
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Geophysical Fluid Dynamics, theory and modeling 
+\end_layout
+
+\begin_layout Author
+S.
+ Thual, Fudan University 2019
+\end_layout
+
+\begin_layout Date
+Small Experiments with Shallow-Water Model
+\end_layout
+
+\begin_layout Section
+Instructions
+\end_layout
+
+\begin_layout Standard
+This document proposes to code, analyze and play with a simple shallow-water
+ model (with rotation) for geophysical fluid dynamics.
+ The content was used for a midterm evaluation.
+ Some necessary notions of Computational Fluid Dynamics are provided in
+ the document Lecture_4_Handout.pdf.
+\end_layout
+
+\begin_layout Subsection
+Starting system
+\end_layout
+
+\begin_layout Standard
+Consider the shallow-water equations: 
+\begin_inset Formula 
+\begin{equation}
+\begin{array}{l}
+\frac{\partial}{\partial t}u-fv=-\frac{\partial}{\partial x}p\\
+\frac{\partial}{\partial t}v+fu=-\frac{\partial}{\partial y}p\\
+\frac{\partial}{\partial t}p+G(\frac{\partial}{\partial x}u+\frac{\partial}{\partial y}v)=0
+\end{array}\label{eq:cont-shallowwater}
+\end{equation}
+
+\end_inset
+
+defined over the domain 
+\begin_inset Formula $\Delta x\le x\le L_{x},\Delta y\le y\le L_{y},\Delta t\le t\le L_{t}$
+\end_inset
+
+.
+ Here 
+\begin_inset Formula $u,v$
+\end_inset
+
+ are zonal velocities, 
+\begin_inset Formula $p$
+\end_inset
+
+ is pressure (or height), and 
+\begin_inset Formula $f$
+\end_inset
+
+ and 
+\begin_inset Formula $G$
+\end_inset
+
+ are parameters.
+ We take values 
+\begin_inset Formula $f=0$
+\end_inset
+
+ and 
+\begin_inset Formula $G=0.01$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $G=\sqrt{c}$
+\end_inset
+
+ where 
+\begin_inset Formula $c=0.1$
+\end_inset
+
+ is the propagation speed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The boundary conditions are periodic in 
+\begin_inset Formula $x$
+\end_inset
+
+ and reflecting in 
+\begin_inset Formula $y$
+\end_inset
+
+, which reads:
+\begin_inset Formula 
+\begin{equation}
+\begin{array}{lllll}
+u(0,y,t)=u(L_{x},y,t) &  & u(x,\Delta y,t)=0 &  & u(x,L_{y},t)=0\\
+v(0,y,t)=v(L_{x},y,t) &  & v(x,\Delta y,t)=0 &  & v(x,L_{y},t)=0\\
+p(0,y,t)=p(L_{x},y,t) &  & \frac{\partial p}{\partial y}(x,\Delta y,t)=0 &  & \frac{\partial p}{\partial y}(x,L_{y},t)=0
+\end{array}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We solve these equations over the model grid detailed at the end of Lecture_4_Ha
+ndout.pdf, with: 
+\begin_inset Formula $x_{i}=i\Delta x$
+\end_inset
+
+ for 
+\begin_inset Formula $i=1,...,N_{x}$
+\end_inset
+
+, 
+\begin_inset Formula $y_{i}=j\Delta y$
+\end_inset
+
+ for 
+\begin_inset Formula $j=1,...,N_{y}$
+\end_inset
+
+, and 
+\begin_inset Formula $t_{k}=k\Delta t$
+\end_inset
+
+ for 
+\begin_inset Formula $k=1,...,N_{t}$
+\end_inset
+
+, where 
+\begin_inset Formula $L_{x}=\Delta xN_{x}$
+\end_inset
+
+, 
+\begin_inset Formula $L_{y}=\Delta yN_{y}$
+\end_inset
+
+ and 
+\begin_inset Formula $L_{t}=\Delta tN_{t}$
+\end_inset
+
+.
+ We take values 
+\begin_inset Formula $\Delta x=2.5$
+\end_inset
+
+, 
+\begin_inset Formula $N_{x}=200$
+\end_inset
+
+ (
+\begin_inset Formula $L_{x}=500$
+\end_inset
+
+), 
+\begin_inset Formula $\Delta y=2.5$
+\end_inset
+
+, 
+\begin_inset Formula $N_{y}=200$
+\end_inset
+
+ (
+\begin_inset Formula $L_{y}=500$
+\end_inset
+
+), and 
+\begin_inset Formula $\Delta t=0.5$
+\end_inset
+
+, 
+\begin_inset Formula $N_{t}=10000$
+\end_inset
+
+ (
+\begin_inset Formula $L_{t}=5000$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We consider an explicit Euler method in time and a centered scheme 2nd order
+ in space to approximate the derivatives.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The initial conditions read: 
+\begin_inset Formula 
+\begin{equation}
+\begin{array}{l}
+u(x,y,0)=0\\
+v(x,y,0)=0\\
+p(x,y,0)=\exp(-a_{x}(x-x_{a})^{2}-a_{y}(y-y_{a})^{2})
+\end{array}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $a_{x}=0.002$
+\end_inset
+
+, 
+\begin_inset Formula $a_{y}=0.002$
+\end_inset
+
+, 
+\begin_inset Formula $x_{a}=L_{x}/2$
+\end_inset
+
+, 
+\begin_inset Formula $y_{a}=L_{y}/2$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Task 1
+\end_layout
+
+\begin_layout Standard
+Do the following: 
+\end_layout
+
+\begin_layout Standard
+a) Write a code in matlab to solve the discrete version of the shallow-water
+ equations.
+ Make sure that the code is readable (use comments) and that parameter values
+ can easily be modified later on.
+ 
+\end_layout
+
+\begin_layout Standard
+b) Integrate the numerical solutions over time.
+ 
+\end_layout
+
+\begin_layout Standard
+c) Use the provided matlab function animatesw.m to create a time-animation
+ of 
+\begin_inset Formula $u$
+\end_inset
+
+,
+\begin_inset Formula $v,$
+\end_inset
+
+
+\begin_inset Formula $p$
+\end_inset
+
+ (you may want to use frameskip=1 and dolevels=1 at first).
+ Save results in a gif file with suitable name (for example test1.gif).
+ 
+\end_layout
+
+\begin_layout Standard
+d) Compute the Courant number (for both 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+) and determine if the CFL conditions are satisfied.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note: solution is provide in the file midterm.m
+\end_layout
+
+\begin_layout Subsection
+Task 2
+\end_layout
+
+\begin_layout Standard
+Consider a new setup and repeat steps a,b,c,d from Task 1 (use a different
+ matlab file !).
+ The new setup must change at least three conditions among the followings:
+ 
+\end_layout
+
+\begin_layout Standard
+1) Initial conditions (change the location of initial perturbation or consider
+ entirely new initial conditions)
+\end_layout
+
+\begin_layout Standard
+2) Boundary conditions (all periodic, all reflecting, or reflecting in 
+\begin_inset Formula $x$
+\end_inset
+
+ and periodic in 
+\begin_inset Formula $y$
+\end_inset
+
+).
+ You may even consider open boundary conditions.
+ 
+\end_layout
+
+\begin_layout Standard
+4) Physical parameters 
+\begin_inset Formula $c$
+\end_inset
+
+ and/or 
+\begin_inset Formula $f$
+\end_inset
+
+ (you may try for example 
+\begin_inset Formula $f=0.01$
+\end_inset
+
+, 
+\begin_inset Formula $f=\beta(y-L_{y}/2)$
+\end_inset
+
+ with 
+\begin_inset Formula $\beta=2\,10^{-5}$
+\end_inset
+
+, 
+\begin_inset Formula $f=-0.02\text{cos}(\pi y/L_{y})$
+\end_inset
+
+, etc).
+ 
+\end_layout
+
+\begin_layout Standard
+6) Resolution 
+\begin_inset Formula $\Delta x$
+\end_inset
+
+, 
+\begin_inset Formula $\Delta y$
+\end_inset
+
+, 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ and/or domain size 
+\begin_inset Formula $L_{x}$
+\end_inset
+
+, 
+\begin_inset Formula $L_{y}$
+\end_inset
+
+, 
+\begin_inset Formula $L_{t}$
+\end_inset
+
+ (try to keep same Courant number as in Task 1d or at least ensure CFL condition
+s)
+\end_layout
+
+\begin_layout Standard
+8) Finite difference method in time: choose among methods in Table 2 from
+ Lecture 4.
+\end_layout
+
+\begin_layout Standard
+9) Any other modifications that are physically sound and correctly implemented.
+ 
+\end_layout
+
+\begin_layout Standard
+Try to find inventive setups where something different happens that is interesti
+ng.
+ Then prepare comments on the physical processes (propagations, boundary
+ conditions, rotation...) and/or the numerical errors (numerical diffusion,
+ aliasing..) and other practical aspects (computation cost, implementation,
+ etc).
+ Note that we have not covered rotation effects for 
+\begin_inset Formula $f\ne0$
+\end_inset
+
+ in the class yet so there is no need to understand these in details.
+ It is also very good to show cases when the setup 
+\series bold
+doesnt work
+\series default
+ and understand the reasons behind it.
+ You will also get a higher score if the setup was more difficult to implement
+ (open boundary conditions, implicit methods, etc).
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note: some examples are documented in the folder tests/
+\end_layout
+
+\end_body
+\end_document
