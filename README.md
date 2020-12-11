@@ -7,7 +7,7 @@ code by Sulian Thual (2019)
 
 Matlab code to integrate a very Simple Shallow-Water Model (with rotation). 
 
-references: github: https://github.com/sulianthual/stochasticskeleton
+references: https://github.com/sulianthual/swfun
 
 <h4>Introduction: </h4>
 
